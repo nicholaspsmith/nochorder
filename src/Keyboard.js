@@ -21,7 +21,49 @@ class Keyboard extends Component {
     flexDirection: 'row'
   }
 
-  synth = new Tone.Synth().toMaster()
+  synth = new Tone.DuoSynth({
+    vibratoAmount  : 0.5 ,
+    vibratoRate  : 3 ,
+    harmonicity  : 1.5 ,
+    voice0  : {
+      volume  : -10 ,
+      portamento  : 0 ,
+      oscillator  : {
+      type  : 'sine'
+    }  ,
+    filterEnvelope  : {
+      attack  : 0.01 ,
+      decay  : 0 ,
+      sustain  : 1 ,
+      release  : 0.5
+    }  ,
+    envelope  : {
+      attack  : 0.01 ,
+      decay  : 0 ,
+      sustain  : 1 ,
+      release  : 0.5
+    }
+    },
+    voice1  : {
+      volume  : -10 ,
+      portamento  : 0 ,
+      oscillator  : {
+      type  : 'sine'
+    },
+    filterEnvelope  : {
+      attack  : 0.01 ,
+      decay  : 0,
+      sustain  : 1 ,
+      release  : 0.5
+    }  ,
+    envelope  : {
+      attack  : 0.01 ,
+      decay  : 0,
+      sustain  : 1 ,
+      release  : 0.5
+      }
+    }
+  }).toMaster()
 
   state = {
     currentNote: null,
@@ -33,6 +75,8 @@ class Keyboard extends Component {
   constructor(props) {
     super(props)
 
+    window.addEventListener('mouseup', this.handleMouseUp, true)
+
     const { octaveStart, octaves } = this.props
     const octavesArray = [...Array(octaves).keys()] // [0,1]
     const octavesArrayCorrectStartOctave = octavesArray.map(oct => oct + octaveStart) // [3,4]
@@ -41,42 +85,41 @@ class Keyboard extends Component {
     ))
   }
 
-  handleMouseDown = e => {
+  playNote = e => {
     // find note value of key that mouse is over
     let note = e.target.getAttribute('note')
     // play synth on note found
     this.synth.triggerAttack(note, Tone.context.currentTime)
-    console.log(`play ${note}`)
     // set current playing note so we can track if it changes
     this.setState({ currentNote: note, mouseDown: true })
-    
-    window.addEventListener('mouseup', this.handleMouseUp, true)
+  }
+
+  handleMouseDown = e => {
+    this.playNote(e)
   }
 
   handleMouseUp = e => {
     this.synth.triggerRelease(Tone.context.currentTime)
     this.setState({ mouseDown: false })
-    window.removeEventListener('mouseup', this.handleMouseUp, true);
+    // window.removeEventListener('mouseup', this.handleMouseUp, true);
   }
 
   handleMouseMove = e => {
-    // if mouse button is down
+    // find note that mouse is currently over
+    let note = e.target.getAttribute('note')
+    const isNewNote = this.state.currentNote !== note
+    if (!isNewNote) return
+
     if (this.state.mouseDown) {
-      // find note that mouse is currently over
-      let note = e.target.getAttribute('note')
-      // if current note mouse is clicking is different than current note
-      if (this.state.currentNote !== note) {
-        // stop playing old note
-        console.log(`stop playing ${this.state.currentNote}`)
-        this.synth.triggerRelease(Tone.context.currentTime)
+      // stop playing old note
+      this.synth.triggerRelease(Tone.context.currentTime)
+      // set new currentNote
+      this.setState({ currentNote: note } , () => {
         // start playing new note
-        console.log(`play ${note}`)
         this.synth.triggerAttack(note, Tone.context.currentTime)
-      } else {
-        this.synth.triggerRelease(Tone.context.currentTime)
+      })
       }
     }
-  }
 
   render() {
     let keyWidth = window.innerWidth / (Keyboard.keyNotes.length * 7/12) //-> 7/12 of the notes are white, white notes take up width, black do not
@@ -88,6 +131,7 @@ class Keyboard extends Component {
           Keyboard.keyNotes.map(
             keyNote => 
               <Key
+                isBeingPlayed={this.state.mouseDown && (keyNote === this.state.currentNote)}
                 key={keyNote}
                 note={keyNote}
                 width={keyWidth}
