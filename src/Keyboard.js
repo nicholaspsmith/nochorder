@@ -126,7 +126,7 @@ class Keyboard extends Component {
     let keyHeight = keyWidth * 4
 
     return (
-      <div style={Keyboard.keyboardStyles} onMouseDown={this.handleMouseDown} onMouseMove={this.handleMouseMove}>
+      <div style={Keyboard.keyboardStyles} onMouseDown={this.handleMouseDown} onTouchStart={this.handleMouseDown} onMouseMove={this.handleMouseMove} onTouchMove={this.handleMouseMove}>
         {
           Keyboard.keyNotes.map(
             keyNote => 
