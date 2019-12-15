@@ -11,7 +11,8 @@ class Key extends Component {
     const whiteKey = this.props.note.indexOf('#')  === -1
 
     return {
-      height: whiteKey ? this.props.height : this.props.height / 2,
+      userSelect: 'none',
+      height: whiteKey ? this.props.height : this.props.height / 1.75,
       width: whiteKey ? this.props.width : this.props.width - 5,
       marginLeft: whiteKey ? 0 : -(this.props.width / 2) + 3,
       marginRight: whiteKey ? 0 : -(this.props.width / 2) + 2,
