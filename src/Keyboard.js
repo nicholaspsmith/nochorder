@@ -116,7 +116,8 @@ class Keyboard extends Component {
       // set new currentNote
       this.setState({ currentNote: note } , () => {
         // start playing new note
-        this.synth.triggerAttack(note, Tone.context.currentTime)
+        if (note !== null)
+          this.synth.triggerAttack(note, Tone.context.currentTime)
       })
       }
     }
@@ -126,7 +127,14 @@ class Keyboard extends Component {
     let keyHeight = keyWidth * 4
 
     return (
-      <div style={Keyboard.keyboardStyles} onMouseDown={this.handleMouseDown} onTouchStart={this.handleMouseDown} onMouseMove={this.handleMouseMove} onTouchMove={this.handleMouseMove}>
+      <div
+        style={Keyboard.keyboardStyles}
+        onMouseDown={this.handleMouseDown}
+        onTouchStart={this.handleMouseDown}
+        onMouseMove={this.handleMouseMove}
+        onTouchMove={this.handleMouseMove}
+        onTouchEnd={() => this.synth.triggerRelease(Tone.context.currentTime)}
+      >
         {
           Keyboard.keyNotes.map(
             keyNote => 
